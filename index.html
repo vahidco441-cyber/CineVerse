@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>CineVerse</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">Cine<span>Verse</span></div>
+    <nav>
+      <a class="active" href="#hero">خانه</a>
+      <a href="#popular">محبوب‌ترین‌ها</a>
+      <a href="#newest">جدیدترین‌ها</a>
+    </nav>
+    <div class="header-actions">
+      <div class="search-box" aria-label="جستجو">
+        <span>⌕</span><input id="searchInput" placeholder="جستجوی فیلم..." autocomplete="off">
+      </div>
+      <button id="reloadBtn" class="icon-btn" title="به‌روزرسانی">↻</button>
+    </div>
+  </header>
+
+  <main>
+    <section id="hero" class="hero">
+      <div class="hero-shade"></div>
+      <div class="hero-content">
+        <div class="hero-kicker"><span></span> پیشنهاد CineVerse</div>
+        <h1 id="heroTitle">در حال بارگذاری فیلم‌ها...</h1>
+        <div id="heroMeta" class="hero-meta">اتصال به Jellyfin</div>
+        <p id="heroOverview" class="hero-overview"></p>
+        <div class="hero-buttons">
+          <button id="heroPlay" class="play-btn"><b>▶</b> پخش فیلم</button>
+          <button class="watch-btn"><b>＋</b> افزودن به لیست</button>
+        </div>
+      </div>
+      <div class="hero-bottom-fade"></div>
+    </section>
+
+    <section id="status" class="status">در حال دریافت فیلم‌ها از Jellyfin...</section>
+
+    <section id="popular" class="section">
+      <div class="section-head">
+        <div>
+          <h2>فیلم‌های محبوب</h2>
+          <p>Popular Movies</p>
+        </div>
+        <a href="#popular">مشاهده همه <span>←</span></a>
+      </div>
+      <div id="popularGrid" class="movie-grid"></div>
+    </section>
+
+    <section id="newest" class="section newest-section">
+      <div class="section-head">
+        <div>
+          <h2>جدیدترین فیلم‌ها</h2>
+          <p>Latest Movies</p>
+        </div>
+        <a href="#newest">مشاهده همه <span>←</span></a>
+      </div>
+      <div id="newestGrid" class="movie-grid"></div>
+    </section>
+  </main>
+
+    <script src="config.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

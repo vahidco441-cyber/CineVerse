@@ -1,0 +1,1 @@
+window.CINEVERSE_CONFIG={proxyBase:"/jellyfin"};
