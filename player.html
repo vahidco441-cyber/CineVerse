@@ -1,54 +1,108 @@
+
 <!doctype html>
 <html lang="fa" dir="rtl">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>CineVerse Player</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#050505">
+  <title>CineVerse | پخش فیلم</title>
+  <link rel="stylesheet" href="style.css">
 </head>
+
 <body class="player-page">
+
 <header class="topbar player-topbar">
   <div class="brand">Cine<span>Verse</span></div>
   <a class="back-home" href="index.html">← بازگشت به CineVerse</a>
 </header>
+
 <main class="player-shell">
-  <div id="playerStatus" class="player-status">در حال آماده‌سازی پخش...</div>
+
+  <div id="playerStatus" class="player-status">
+    در حال آماده‌سازی پخش...
+  </div>
+
   <section class="standalone-player">
-    <video id="standaloneVideo" controls autoplay playsinline preload="metadata"></video>
+    <video
+      id="standaloneVideo"
+      controls
+      autoplay
+      playsinline
+      preload="metadata">
+    </video>
+
     <div class="player-info">
       <div>
-        <div id="standaloneTitle" class="standalone-title">در حال بارگذاری...</div>
+        <div id="standaloneTitle" class="standalone-title">
+          در حال بارگذاری...
+        </div>
         <div id="standaloneMeta" class="standalone-meta"></div>
       </div>
-      <a id="jellyfinLink" class="jellyfin-link" target="_blank" rel="noopener">Jellyfin</a>
     </div>
   </section>
+
 </main>
+
 <script src="config.js"></script>
+
 <script>
-const C=window.CINEVERSE_CONFIG;
-const api=p=>C.proxyBase+p;
-const $=id=>document.getElementById(id);
-const qs=new URLSearchParams(location.search);
-const id=qs.get('id');
-const name=qs.get('name')||'فیلم';
-const year=qs.get('year')||'—';
-const rating=qs.get('rating');
-function status(t,c=''){$('playerStatus').textContent=t;$('playerStatus').className='player-status '+c;}
-function start(){
-  if(!id){status('فیلم انتخاب نشده است.','error');return;}
-  $('standaloneTitle').textContent=name;
-  $('standaloneMeta').textContent=`${year}  •  ★ ${rating?Number(rating).toFixed(1):'—'}`;
-  $('jellyfinLink').href=`${location.protocol}//${location.hostname}:8096/web/index.html#!/details?id=${encodeURIComponent(id)}`;
-  const v=$('standaloneVideo');
-  const src=api(`/Videos/${encodeURIComponent(id)}/stream?static=true`);
-  v.addEventListener('loadedmetadata',()=>status('پخش آماده است','ok'),{once:true});
-  v.addEventListener('error',()=>status('پخش فیلم انجام نشد.','error'),{once:true});
-  status('در حال بارگذاری فیلم...');
-  v.src=src;
-  v.load();
+const $ = id => document.getElementById(id);
+
+const config = window.CINEVERSE_CONFIG || {};
+const base = (config.proxyBase || "/jellyfin").replace(/\/+$/, "");
+
+const api = path => base + (path.startsWith("/") ? path : "/" + path);
+
+const params = new URLSearchParams(window.location.search);
+
+const id = params.get("id");
+const name = params.get("name") || "فیلم";
+const year = params.get("year") || "—";
+const rating = params.get("rating");
+
+function setStatus(message, type = "") {
+  const status = $("playerStatus");
+  status.textContent = message;
+  status.className = "player-status " + type;
 }
-start();
+
+function startPlayer() {
+  if (!id) {
+    setStatus("فیلم انتخاب نشده است.", "error");
+    $("standaloneTitle").textContent = "فیلمی انتخاب نشده";
+    return;
+  }
+
+  $("standaloneTitle").textContent = name;
+
+  $("standaloneMeta").textContent =
+    `${year}  •  ★ ${rating ? Number(rating).toFixed(1) : "—"}`;
+
+  const video = $("standaloneVideo");
+
+  const streamUrl = api(
+    `/Videos/${encodeURIComponent(id)}/stream?static=true`
+  );
+
+  video.addEventListener("loadedmetadata", () => {
+    setStatus("پخش آماده است.", "ok");
+  }, { once: true });
+
+  video.addEventListener("error", () => {
+    setStatus(
+      "پخش فیلم انجام نشد. اتصال Jellyfin یا آدرس تونل را بررسی کنید.",
+      "error"
+    );
+  }, { once: true });
+
+  setStatus("در حال بارگذاری فیلم...");
+
+  video.src = streamUrl;
+  video.load();
+}
+
+startPlayer();
 </script>
+
 </body>
 </html>
