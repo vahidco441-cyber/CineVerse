@@ -1,8 +1,6 @@
-```javascript
-// CineVerse V8 - GitHub + Jellyfin
-// GitHub test video + Jellyfin library
+// CineVerse V9 - GitHub Pages + Jellyfin
 
-const $ = (id) => document.getElementById(id);
+const $ = id => document.getElementById(id);
 
 let movies = [];
 let currentHero = null;
@@ -15,7 +13,7 @@ const githubMovie = {
   Name: "فیلم آزمایشی",
   ProductionYear: "2026",
   CommunityRating: null,
-  Overview: "فیلم آزمایشی CineVerse از GitHub",
+  Overview: "فیلم آزمایشی CineVerse",
   IsGitHub: true,
   VideoUrl: GITHUB_VIDEO
 };
@@ -28,6 +26,7 @@ function jellyfin(path) {
 
 function imageUrl(item) {
   if (!item || !item.Id || item.IsGitHub) return "";
+
   return jellyfin(
     `/Items/${encodeURIComponent(item.Id)}/Images/Primary?fillWidth=500&quality=90`
   );
@@ -35,11 +34,11 @@ function imageUrl(item) {
 
 function esc(s) {
   return String(s || "").replace(/[&<>"']/g, m => ({
-    "&":"&amp;",
-    "<":"&lt;",
-    ">":"&gt;",
-    '"':"&quot;",
-    "'":"&#039;"
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#039;"
   }[m]));
 }
 
@@ -53,7 +52,7 @@ function card(item) {
 
   const posterStyle = bg
     ? `background-image:url('${bg}')`
-    : "background:linear-gradient(145deg,#252525,#090909)";
+    : "background:linear-gradient(145deg,#292929,#080808)";
 
   return `
     <article class="movie-card"
@@ -83,22 +82,57 @@ function render(id, list) {
 
   el.querySelectorAll(".movie-card").forEach(c => {
     c.onclick = () => {
-      openMovie(c.dataset.id, c.dataset.github === "true");
+      openMovie(
+        c.dataset.id,
+        c.dataset.github === "true"
+      );
     };
   });
 }
 
-function setStatus(text, type = "") {
+function setStatus(message, type = "") {
   const el = $("status");
   if (!el) return;
 
-  el.textContent = text;
+  el.textContent = message;
   el.className = "status " + type;
 }
 
+function setHero(item) {
+  currentHero = item;
+  if (!item) return;
+
+  const title = $("heroTitle");
+  const meta = $("heroMeta");
+  const overview = $("heroOverview");
+  const hero = $("hero");
+
+  if (title) title.textContent = item.Name || "";
+
+  if (meta) {
+    meta.textContent =
+      `${item.ProductionYear || "—"} • ★ ${
+        item.CommunityRating
+          ? Number(item.CommunityRating).toFixed(1)
+          : "—"
+      }`;
+  }
+
+  if (overview) {
+    overview.textContent = item.Overview || "";
+  }
+
+  const bg = imageUrl(item);
+
+  if (hero && bg) {
+    hero.style.backgroundImage =
+      `linear-gradient(90deg,#050505 8%,rgba(5,5,5,.76) 42%,rgba(5,5,5,.25) 100%),url("${bg}")`;
+  }
+}
+
 async function loadAllMovies() {
-  const pageSize = 100;
   const all = [];
+  const pageSize = 100;
   let start = 0;
   let total = null;
 
@@ -113,9 +147,10 @@ async function loadAllMovies() {
       `&Limit=${pageSize}` +
       `&EnableTotalRecordCount=true`;
 
-    const response = await fetch(jellyfin("/Items" + params), {
-      cache: "no-store"
-    });
+    const response = await fetch(
+      jellyfin("/Items" + params),
+      { cache: "no-store" }
+    );
 
     if (!response.ok) {
       throw new Error("Jellyfin HTTP " + response.status);
@@ -142,86 +177,6 @@ async function loadAllMovies() {
   return all;
 }
 
-function removeNewestSection() {
-  const section = document.getElementById("newest");
-  if (section) section.remove();
-
-  document.querySelectorAll('a[href="#newest"]').forEach(a => a.remove());
-}
-
-async function loadMovies() {
-  removeNewestSection();
-
-  setStatus("در حال دریافت فیلم‌ها...");
-
-  let jellyfinMovies = [];
-
-  try {
-    jellyfinMovies = await loadAllMovies();
-  } catch (e) {
-    console.error("Jellyfin:", e);
-  }
-
-  // Combine Jellyfin movies and GitHub test movie
-  movies = [...jellyfinMovies, githubMovie];
-
-  const popular = [...movies]
-    .sort((a, b) =>
-      (b.CommunityRating || 0) - (a.CommunityRating || 0)
-    )
-    .slice(0, 12);
-
-  render("popularGrid", popular);
-
-  if (jellyfinMovies.length > 0) {
-    setHero(popular[0]);
-
-    setStatus(
-      `اتصال موفق است — ${jellyfinMovies.length} فیلم Jellyfin و ۱ فیلم GitHub`,
-      "ok"
-    );
-  } else {
-    setHero(githubMovie);
-
-    setStatus(
-      "فیلم آزمایشی GitHub آماده نمایش است.",
-      "ok"
-    );
-  }
-}
-
-function setHero(item) {
-  currentHero = item;
-  if (!item) return;
-
-  const title = $("heroTitle");
-  const meta = $("heroMeta");
-  const overview = $("heroOverview");
-  const hero = $("hero");
-
-  if (title) title.textContent = item.Name || "";
-
-  if (meta) {
-    meta.textContent =
-      `${item.ProductionYear || "—"}  •  ★ ${
-        item.CommunityRating
-          ? Number(item.CommunityRating).toFixed(1)
-          : "—"
-      }`;
-  }
-
-  if (overview) {
-    overview.textContent = item.Overview || "";
-  }
-
-  const bg = imageUrl(item);
-
-  if (hero && bg) {
-    hero.style.backgroundImage =
-      `linear-gradient(90deg,#050505 8%,rgba(5,5,5,.76) 42%,rgba(5,5,5,.25) 100%),url("${bg}")`;
-  }
-}
-
 function openMovie(id, isGitHub = false) {
   const item = movies.find(x => x.Id === id);
   if (!item) return;
@@ -236,12 +191,74 @@ function openMovie(id, isGitHub = false) {
       year: item.ProductionYear
     });
 
-    window.location.href = "player.html?" + params.toString();
+    location.href = "player.html?" + params.toString();
     return;
   }
 
-  window.location.href =
-    `player.html?id=${encodeURIComponent(item.Id)}`;
+  location.href =
+    "player.html?id=" + encodeURIComponent(item.Id);
+}
+
+async function loadMovies() {
+
+  // GitHub Pages: no Jellyfin requests
+  if (location.hostname.endsWith("github.io")) {
+    movies = [githubMovie];
+
+    render("popularGrid", movies);
+    setHero(githubMovie);
+
+    setStatus(
+      "فیلم آزمایشی GitHub آماده نمایش است.",
+      "ok"
+    );
+
+    return;
+  }
+
+  // Local server: Jellyfin + GitHub
+  const newest = document.getElementById("newest");
+  if (newest) newest.remove();
+
+  document.querySelectorAll('a[href="#newest"]')
+    .forEach(a => a.remove());
+
+  setStatus("در حال دریافت فیلم‌ها...");
+
+  let jellyfinMovies = [];
+
+  try {
+    jellyfinMovies = await loadAllMovies();
+  } catch (error) {
+    console.error(error);
+  }
+
+  movies = [...jellyfinMovies, githubMovie];
+
+  const popular = [...movies]
+    .sort((a, b) =>
+      (b.CommunityRating || 0) -
+      (a.CommunityRating || 0)
+    )
+    .slice(0, 12);
+
+  render("popularGrid", popular);
+
+  if (jellyfinMovies.length > 0) {
+    setHero(popular[0]);
+
+    setStatus(
+      `اتصال موفق — ${jellyfinMovies.length} فیلم Jellyfin و ۱ فیلم GitHub`,
+      "ok"
+    );
+  } else {
+    setHero(githubMovie);
+
+    setStatus(
+      "فیلم آزمایشی GitHub آماده نمایش است.",
+      "ok"
+    );
+  }
 }
 
 const reload = $("reloadBtn");
@@ -259,7 +276,8 @@ if (search) {
         ).slice(0, 24)
       : [...movies]
           .sort((a, b) =>
-            (b.CommunityRating || 0) - (a.CommunityRating || 0)
+            (b.CommunityRating || 0) -
+            (a.CommunityRating || 0)
           )
           .slice(0, 12);
 
@@ -268,4 +286,3 @@ if (search) {
 }
 
 loadMovies();
-```
