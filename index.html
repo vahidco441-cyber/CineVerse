@@ -1,110 +1,69 @@
-
 <!doctype html>
 <html lang="fa" dir="rtl">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#050505">
-  <title>CineVerse | سینما آنلاین</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>CineVerse</title>
   <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
-
   <header class="topbar">
     <div class="brand">Cine<span>Verse</span></div>
-
     <nav>
       <a class="active" href="#hero">خانه</a>
-      <a href="#newest">فیلم‌ها</a>
+      <a href="#popular">محبوب‌ترین‌ها</a>
+      <a href="#newest">جدیدترین‌ها</a>
     </nav>
-
     <div class="header-actions">
-      <div class="search-box" aria-label="جستجوی فیلم">
-        <span>⌕</span>
-        <input
-          id="searchInput"
-          type="search"
-          placeholder="جستجوی فیلم..."
-          autocomplete="off"
-        >
+      <div class="search-box" aria-label="جستجو">
+        <span>⌕</span><input id="searchInput" placeholder="جستجوی فیلم..." autocomplete="off">
       </div>
-
-      <button
-        id="tgBtn"
-        class="icon-btn"
-        type="button"
-        title="کانال تلگرام"
-      >✈</button>
+      <button id="reloadBtn" class="icon-btn" title="به‌روزرسانی">↻</button>
     </div>
   </header>
 
   <main>
-
     <section id="hero" class="hero">
       <div class="hero-shade"></div>
-
       <div class="hero-content">
-        <div class="hero-kicker">
-          <span></span>
-          پیشنهاد CineVerse
-        </div>
-
-        <h1 id="heroTitle">در حال بارگذاری...</h1>
-
-        <div id="heroMeta" class="hero-meta"></div>
-
+        <div class="hero-kicker"><span></span> پیشنهاد CineVerse</div>
+        <h1 id="heroTitle">در حال بارگذاری فیلم‌ها...</h1>
+        <div id="heroMeta" class="hero-meta">اتصال به Jellyfin</div>
         <p id="heroOverview" class="hero-overview"></p>
-
         <div class="hero-buttons">
-          <button
-            id="heroPlay"
-            class="play-btn"
-            type="button"
-          >
-            <b>▶</b>
-            تماشا در تلگرام
-          </button>
-
-          <button
-            id="heroChannel"
-            class="watch-btn"
-            type="button"
-          >
-            <b>✈</b>
-            کانال CineVerse
-          </button>
+          <button id="heroPlay" class="play-btn"><b>▶</b> پخش فیلم</button>
+          <button class="watch-btn"><b>＋</b> افزودن به لیست</button>
         </div>
       </div>
-
       <div class="hero-bottom-fade"></div>
     </section>
 
-    <section id="status" class="status">
-      در حال بارگذاری فیلم‌ها...
+    <section id="status" class="status">در حال دریافت فیلم‌ها از Jellyfin...</section>
+
+    <section id="popular" class="section">
+      <div class="section-head">
+        <div>
+          <h2>فیلم‌های محبوب</h2>
+          <p>Popular Movies</p>
+        </div>
+        <a href="#popular">مشاهده همه <span>←</span></a>
+      </div>
+      <div id="popularGrid" class="movie-grid"></div>
     </section>
 
     <section id="newest" class="section newest-section">
-
       <div class="section-head">
         <div>
-          <h2>فیلم‌های CineVerse</h2>
-          <p>DISCOVER MOVIES</p>
+          <h2>جدیدترین فیلم‌ها</h2>
+          <p>Latest Movies</p>
         </div>
+        <a href="#newest">مشاهده همه <span>←</span></a>
       </div>
-
-      <div id="newestGrid" class="movie-grid">
-        <div class="empty">
-          در حال دریافت فیلم‌ها...
-        </div>
-      </div>
-
+      <div id="newestGrid" class="movie-grid"></div>
     </section>
-
   </main>
 
-  <script src="config.js"></script>
+    <script src="config.js"></script>
   <script src="script.js"></script>
-
 </body>
 </html>
