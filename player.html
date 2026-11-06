@@ -1,3 +1,4 @@
+```html
 <!doctype html>
 <html lang="fa" dir="rtl">
 <head>
@@ -6,49 +7,96 @@
 <title>CineVerse Player</title>
 <link rel="stylesheet" href="style.css">
 </head>
+
 <body class="player-page">
+
 <header class="topbar player-topbar">
   <div class="brand">Cine<span>Verse</span></div>
   <a class="back-home" href="index.html">← بازگشت به CineVerse</a>
 </header>
+
 <main class="player-shell">
-  <div id="playerStatus" class="player-status">در حال آماده‌سازی پخش...</div>
+
+  <div id="playerStatus" class="player-status">
+    در حال آماده‌سازی پخش...
+  </div>
+
   <section class="standalone-player">
-    <video id="standaloneVideo" controls autoplay playsinline preload="metadata"></video>
+
+    <video
+      id="standaloneVideo"
+      controls
+      playsinline
+      preload="metadata">
+    </video>
+
     <div class="player-info">
       <div>
-        <div id="standaloneTitle" class="standalone-title">در حال بارگذاری...</div>
-        <div id="standaloneMeta" class="standalone-meta"></div>
+        <div id="standaloneTitle" class="standalone-title">
+          فیلم آزمایشی
+        </div>
+        <div id="standaloneMeta" class="standalone-meta">
+          GitHub Video
+        </div>
       </div>
-      <a id="jellyfinLink" class="jellyfin-link" target="_blank" rel="noopener">Jellyfin</a>
+
+      <a id="jellyfinLink" class="jellyfin-link"
+         target="_blank" rel="noopener">
+        دریافت فایل
+      </a>
     </div>
+
   </section>
 </main>
+
 <script src="config.js"></script>
+
 <script>
-const C=window.CINEVERSE_CONFIG;
-const api=p=>C.proxyBase+p;
-const $=id=>document.getElementById(id);
-const qs=new URLSearchParams(location.search);
-const id=qs.get('id');
-const name=qs.get('name')||'فیلم';
-const year=qs.get('year')||'—';
-const rating=qs.get('rating');
-function status(t,c=''){$('playerStatus').textContent=t;$('playerStatus').className='player-status '+c;}
-function start(){
-  if(!id){status('فیلم انتخاب نشده است.','error');return;}
-  $('standaloneTitle').textContent=name;
-  $('standaloneMeta').textContent=`${year}  •  ★ ${rating?Number(rating).toFixed(1):'—'}`;
-  $('jellyfinLink').href=`${location.protocol}//${location.hostname}:8096/web/index.html#!/details?id=${encodeURIComponent(id)}`;
-  const v=$('standaloneVideo');
-  const src=api(`/Videos/${encodeURIComponent(id)}/stream?static=true`);
-  v.addEventListener('loadedmetadata',()=>status('پخش آماده است','ok'),{once:true});
-  v.addEventListener('error',()=>status('پخش فیلم انجام نشد.','error'),{once:true});
-  status('در حال بارگذاری فیلم...');
-  v.src=src;
-  v.load();
+const $ = id => document.getElementById(id);
+
+const qs = new URLSearchParams(location.search);
+
+const defaultVideo =
+"https://raw.githubusercontent.com/vahidco441-cyber/CineVerse/main/videos/_WqVViW3eCuSla7E.mp4";
+
+const videoUrl = qs.get('video') || defaultVideo;
+const name = qs.get('name') || 'فیلم آزمایشی';
+const year = qs.get('year') || 'GitHub';
+
+function status(message, type = '') {
+  $('playerStatus').textContent = message;
+  $('playerStatus').className = 'player-status ' + type;
 }
+
+function start() {
+
+  $('standaloneTitle').textContent = name;
+  $('standaloneMeta').textContent = year;
+
+  const video = $('standaloneVideo');
+
+  $('jellyfinLink').href = videoUrl;
+
+  video.addEventListener('loadedmetadata', () => {
+    status('فیلم آماده پخش است', 'ok');
+  });
+
+  video.addEventListener('error', () => {
+    status('خطا در پخش فیلم. آدرس یا فرمت فایل را بررسی کنید.', 'error');
+  });
+
+  video.addEventListener('waiting', () => {
+    status('در حال بارگذاری فیلم...');
+  });
+
+  video.src = videoUrl;
+  video.load();
+
+}
+
 start();
 </script>
+
 </body>
 </html>
+```
