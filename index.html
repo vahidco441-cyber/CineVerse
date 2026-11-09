@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="fa" dir="rtl">
 <head>
@@ -6,160 +5,65 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>CineVerse</title>
   <link rel="stylesheet" href="style.css">
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="config.js"></script>
-  <script defer src="app.js"></script>
-
-  <style>
-    .series-section {
-      padding: 45px 0;
-    }
-
-    .series-card {
-      max-width: 340px;
-      padding: 18px;
-      border: 1px solid rgba(212,175,55,.35);
-      border-radius: 14px;
-      background: #111;
-    }
-
-    .series-poster {
-      width: 100%;
-      aspect-ratio: 2/3;
-      object-fit: cover;
-      border-radius: 10px;
-      background: #222;
-    }
-
-    .episode-row {
-      margin-top: 16px;
-      padding: 14px;
-      background: #1c1c1c;
-      border-radius: 10px;
-    }
-
-    .download-btn {
-      display: inline-block;
-      margin-top: 12px;
-      padding: 11px 20px;
-      border-radius: 8px;
-      background: #d4af37;
-      color: #050505;
-      text-decoration: none;
-      font-weight: bold;
-    }
-  </style>
 </head>
-
 <body>
-
-<header>
-  <a class="logo" href="index.html">Cine<span>Verse</span></a>
-
-  <nav>
-    <a href="index.html">خانه</a>
-    <a href="#catalog">آرشیو فیلم‌ها</a>
-    <a href="#series">سریال‌ها</a>
-    <a href="admin.html">مدیریت</a>
-  </nav>
-</header>
-
-<main>
-
-  <section class="hero">
-    <div>
-      <small>CINEVERSE · YOUR NEXT STORY</small>
-
-      <h1>
-        داستان بعدی‌ات
-        <br>
-        <em>اینجا شروع می‌شود.</em>
-      </h1>
-
-      <p>فیلم‌ها و سریال‌های مورد علاقه‌ات را کشف کن.</p>
-
-      <a class="btn" href="#catalog">کشف آرشیو ←</a>
-    </div>
-
-    <div class="poster-art">
-      CINE<br>VERSE
-    </div>
-  </section>
-
-  <!-- MOVIES -->
-
-  <section id="catalog">
-    <h2>آرشیو <em>فیلم‌ها</em></h2>
-
-    <div class="filters">
-      <input id="searchInput" placeholder="جست‌وجوی فیلم...">
-
-      <select id="categoryFilter">
-        <option value="">همه دسته‌ها</option>
-        <option>اکشن</option>
-        <option>درام</option>
-        <option>کمدی</option>
-        <option>ترسناک</option>
-        <option>علمی‌تخیلی</option>
-        <option>عاشقانه</option>
-        <option>مستند</option>
-        <option>سایر</option>
-      </select>
-    </div>
-
-    <p id="movieCount">در حال بارگذاری...</p>
-
-    <div id="movieGrid" class="grid">
-      در حال دریافت آرشیو...
-    </div>
-  </section>
-
-  <!-- SERIES -->
-
-  <section id="series" class="series-section">
-
-    <h2>آرشیو <em>سریال‌ها</em></h2>
-
-    <div class="series-card">
-
-      <img
-        class="series-poster"
-        src="https://image.tmdb.org/t/p/w500/9yGA3p1W9v6Z0yQJ0n7j4Q6Y9xP.jpg"
-        alt="Emily in Paris"
-        onerror="this.style.display='none'"
-      >
-
-      <h2>امیلی در پاریس</h2>
-
-      <p>Emily in Paris</p>
-
-      <p>فصل اول · 2020</p>
-
-      <div class="episode-row">
-
-        <h3>قسمت ۱</h3>
-
-        <p>فرمت فایل: MKV</p>
-        <p>منبع: ابرهمراهی</p>
-
-        <a
-          class="download-btn"
-          href="https://abrehamrahi.ir/o/public/F1pztXdT/"
-        >
-          دانلود قسمت ۱
-        </a>
-
+  <header class="topbar">
+    <div class="brand">Cine<span>Verse</span></div>
+    <nav>
+      <a class="active" href="#hero">خانه</a>
+      <a href="#popular">محبوب‌ترین‌ها</a>
+      <a href="#newest">جدیدترین‌ها</a>
+    </nav>
+    <div class="header-actions">
+      <div class="search-box" aria-label="جستجو">
+        <span>⌕</span><input id="searchInput" placeholder="جستجوی فیلم..." autocomplete="off">
       </div>
-
+      <button id="reloadBtn" class="icon-btn" title="به‌روزرسانی">↻</button>
     </div>
-  </section>
+  </header>
 
-</main>
+  <main>
+    <section id="hero" class="hero">
+      <div class="hero-shade"></div>
+      <div class="hero-content">
+        <div class="hero-kicker"><span></span> پیشنهاد CineVerse</div>
+        <h1 id="heroTitle">در حال بارگذاری فیلم‌ها...</h1>
+        <div id="heroMeta" class="hero-meta">اتصال به Jellyfin</div>
+        <p id="heroOverview" class="hero-overview"></p>
+        <div class="hero-buttons">
+          <button id="heroPlay" class="play-btn"><b>▶</b> پخش فیلم</button>
+          <button class="watch-btn"><b>＋</b> افزودن به لیست</button>
+        </div>
+      </div>
+      <div class="hero-bottom-fade"></div>
+    </section>
 
-<footer>
-  CineVerse · تجربه‌ای تازه از تماشای فیلم و سریال
-</footer>
+    <section id="status" class="status">در حال دریافت فیلم‌ها از Jellyfin...</section>
 
+    <section id="popular" class="section">
+      <div class="section-head">
+        <div>
+          <h2>فیلم‌های محبوب</h2>
+          <p>Popular Movies</p>
+        </div>
+        <a href="#popular">مشاهده همه <span>←</span></a>
+      </div>
+      <div id="popularGrid" class="movie-grid"></div>
+    </section>
+
+    <section id="newest" class="section newest-section">
+      <div class="section-head">
+        <div>
+          <h2>جدیدترین فیلم‌ها</h2>
+          <p>Latest Movies</p>
+        </div>
+        <a href="#newest">مشاهده همه <span>←</span></a>
+      </div>
+      <div id="newestGrid" class="movie-grid"></div>
+    </section>
+  </main>
+
+    <script src="config.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
