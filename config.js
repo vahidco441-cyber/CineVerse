@@ -1,10 +1,3 @@
-
-// CineVerse - New Configuration
-// Supabase: Movie posters
-// Abr Hamrah: Movie download links
-// No Jellyfin, Telegram or Tunnel
-
-window.CINEVERSE_CONFIG = {
-  supabaseUrl: "https://orxjeuwghijwqjocmnzd.supabase.co",
-  posterBucket: "movie-posters 3."
-};
+// فقط Project URL و کلید عمومی anon/publishable را وارد کن.
+// هرگز service_role یا secret key را در GitHub قرار نده.
+window.CINEVERSE_CONFIG={supabaseUrl:"PASTE_SUPABASE_PROJECT_URL_HERE",supabaseAnonKey:"PASTE_SUPABASE_ANON_OR_PUBLISHABLE_KEY_HERE"};
