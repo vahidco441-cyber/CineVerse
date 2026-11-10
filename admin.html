@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CineVerse Studio | پنل مدیریت</title>
+<title>CineVerse Studio | مدیریت</title>
 
 <link rel="stylesheet" href="style.css">
 
@@ -16,27 +16,31 @@
 :root {
   --gold: #d4af37;
   --gold-light: #f5dc83;
-  --bg: #070707;
-  --panel: rgba(24,24,24,.82);
-  --border: rgba(212,175,55,.2);
-  --text: #f5f5f5;
+  --bg: #080808;
+  --panel: rgba(25,25,25,.88);
+  --border: rgba(212,175,55,.25);
+  --text: #fff;
   --muted: #999;
+}
+
+* {
+  box-sizing: border-box;
 }
 
 body {
   margin: 0;
   min-height: 100vh;
   background:
-    radial-gradient(ellipse at 80% 0%, #30230d 0%, transparent 35%),
-    radial-gradient(ellipse at 10% 80%, #18120a 0%, transparent 35%),
+    radial-gradient(ellipse at 80% 0%, #39280c 0%, transparent 35%),
+    radial-gradient(ellipse at 10% 90%, #211608 0%, transparent 35%),
     var(--bg);
   color: var(--text);
   font-family: Tahoma, Arial, sans-serif;
 }
 
 header {
-  height: 75px;
-  padding: 0 7%;
+  min-height: 75px;
+  padding: 15px 7%;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -53,15 +57,14 @@ header {
   direction: ltr;
 }
 
-.logo span, h1 em {
+.logo span {
   color: var(--gold);
-  font-style: normal;
 }
 
 .btn {
   display: inline-block;
-  padding: 12px 24px;
-  background: linear-gradient(135deg,#f1d36a,#b58a20);
+  padding: 13px 23px;
+  background: linear-gradient(135deg,#f5dc83,#b58a20);
   color: #111;
   border: none;
   border-radius: 10px;
@@ -85,12 +88,17 @@ header {
 
 .admin {
   width: min(1050px, 90%);
-  margin: 65px auto;
+  margin: 60px auto;
 }
 
 h1 {
-  font-size: 36px;
+  font-size: 35px;
   margin-bottom: 35px;
+}
+
+h1 em {
+  color: var(--gold);
+  font-style: normal;
 }
 
 .panel {
@@ -122,22 +130,21 @@ h1 {
 form {
   display: flex;
   flex-direction: column;
-  gap: 17px;
+  gap: 18px;
   margin-top: 25px;
 }
 
 label {
   display: flex;
   flex-direction: column;
-  gap: 9px;
+  gap: 10px;
   color: #ddd;
   font-size: 14px;
 }
 
 input, select, textarea {
   width: 100%;
-  box-sizing: border-box;
-  padding: 14px;
+  padding: 15px;
   color: white;
   background: #101010;
   border: 1px solid #383838;
@@ -175,10 +182,11 @@ label.inline input {
 }
 
 form .btn {
-  margin-top: 5px;
+  width: 100%;
 }
 
-#formMessage, #loginMessage {
+#formMessage,
+#loginMessage {
   color: var(--gold-light);
   font-size: 14px;
 }
@@ -193,6 +201,17 @@ form .btn {
   border: 1px solid #333;
   border-radius: 12px;
   padding: 15px;
+  color: white;
+}
+
+#adminMovies button {
+  background: #292929;
+  color: var(--gold-light);
+  border: 1px solid #555;
+  border-radius: 8px;
+  padding: 9px 15px;
+  cursor: pointer;
+  margin: 5px;
 }
 
 footer {
@@ -208,7 +227,7 @@ footer {
 
 @media(max-width:600px) {
   header {
-    padding: 0 5%;
+    padding: 15px 5%;
   }
 
   .admin {
@@ -217,7 +236,7 @@ footer {
   }
 
   h1 {
-    font-size: 28px;
+    font-size: 27px;
   }
 
   .panel {
@@ -238,8 +257,13 @@ footer {
 <body>
 
 <header>
-  <a class="logo" href="index.html">Cine<span>Verse</span></a>
-  <a class="btn" href="index.html">بازگشت به سایت</a>
+  <a class="logo" href="index.html">
+    Cine<span>Verse</span>
+  </a>
+
+  <a class="btn" href="index.html">
+    بازگشت به سایت
+  </a>
 </header>
 
 <main class="admin">
@@ -247,30 +271,56 @@ footer {
 <h1>پنل <em>مدیریت</em></h1>
 
 <section id="loginPanel" class="panel">
+
   <h2>ورود مدیر</h2>
-  <p>به استودیوی اختصاصی CineVerse خوش آمدید.</p>
-  <p>با حساب مدیر Supabase وارد شوید.</p>
+
+  <p>
+    به استودیوی اختصاصی CineVerse خوش آمدید.
+  </p>
+
+  <p>
+    برای ورود به پنل مدیریت، مشخصات خود را وارد کنید.
+  </p>
 
   <form id="loginForm">
+
     <label>
-      ایمیل مدیر
-      <input id="email" type="email" placeholder="admin@example.com" required>
+      نام کاربری مدیر
+      <input
+        id="email"
+        type="text"
+        value="vahid"
+        placeholder="vahid"
+        autocomplete="username"
+        required
+      >
     </label>
 
     <label>
       رمز عبور
-      <input id="password" type="password" placeholder="رمز عبور" required>
+      <input
+        id="password"
+        type="password"
+        placeholder="رمز عبور"
+        autocomplete="current-password"
+        required
+      >
     </label>
 
-    <button class="btn" type="submit">ورود به پنل مدیریت</button>
+    <button class="btn" type="submit">
+      ورود به پنل مدیریت
+    </button>
+
   </form>
 
   <p id="loginMessage"></p>
+
 </section>
 
 <section id="dashboard" hidden>
 
   <div class="panel">
+
     <h2 id="formTitle">افزودن فیلم جدید</h2>
 
     <button id="logoutBtn" class="btn secondary" type="button">
@@ -283,10 +333,11 @@ footer {
 
       <label>
         نام فیلم *
-        <input id="title" required placeholder="نام فیلم را وارد کنید">
+        <input id="title" required placeholder="نام فیلم">
       </label>
 
       <div class="two">
+
         <label>
           سال انتشار
           <input id="year" type="number" placeholder="2026">
@@ -294,11 +345,14 @@ footer {
 
         <label>
           امتیاز فیلم
-          <input id="rating" type="number" min="0" max="10" step=".1" placeholder="8.5">
+          <input id="rating" type="number"
+          min="0" max="10" step=".1" placeholder="8.5">
         </label>
+
       </div>
 
       <div class="two">
+
         <label>
           دسته‌بندی
           <select id="category">
@@ -317,6 +371,7 @@ footer {
           زبان فیلم
           <input id="language" placeholder="فارسی، انگلیسی و...">
         </label>
+
       </div>
 
       <label>
@@ -331,7 +386,8 @@ footer {
 
       <label>
         توضیحات فیلم
-        <textarea id="overview" rows="4" placeholder="خلاصه داستان فیلم..."></textarea>
+        <textarea id="overview" rows="4"
+        placeholder="خلاصه داستان فیلم..."></textarea>
       </label>
 
       <label class="inline">
@@ -339,7 +395,9 @@ footer {
         انتشار فیلم در سایت
       </label>
 
-      <button class="btn" type="submit">ذخیره فیلم</button>
+      <button class="btn" type="submit">
+        ذخیره فیلم
+      </button>
 
       <button id="resetBtn" class="btn secondary" type="button">
         پاک کردن فرم
@@ -348,11 +406,15 @@ footer {
       <p id="formMessage"></p>
 
     </form>
+
   </div>
 
   <div class="panel">
+
     <h2>فیلم‌های ثبت‌شده</h2>
+
     <div id="adminMovies"></div>
+
   </div>
 
 </section>
