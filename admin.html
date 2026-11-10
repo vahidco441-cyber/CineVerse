@@ -285,12 +285,11 @@ footer {
   <form id="loginForm">
 
     <label>
-      نام کاربری مدیر
+      ایمیل حساب مدیر
       <input
         id="email"
-        type="text"
-        value="vahid"
-        placeholder="vahid"
+        type="email"
+        placeholder="ایمیل ثبت‌شده مدیر"
         autocomplete="username"
         required
       >
@@ -375,14 +374,26 @@ footer {
       </div>
 
       <label>
-        لینک پوستر فیلم
+        فایل پوستر (اختیاری)
+        <input id="posterFile" type="file" accept="image/jpeg,image/png,image/webp">
+      </label>
+
+      <label>
+        یا لینک پوستر
         <input id="posterUrl" type="url" placeholder="https://...">
       </label>
 
       <label>
-        لینک مستقیم فیلم
+        فایل فیلم برای آپلود
+        <input id="videoFile" type="file" accept="video/*,.mkv,.mp4,.webm,.mov">
+      </label>
+
+      <label>
+        یا لینک مستقیم فیلم
         <input id="videoUrl" type="url" placeholder="https://...">
       </label>
+
+      <p>فایل‌ها در فضای ذخیره‌سازی سایت قرار می‌گیرند. سقف حجم آپلود به پلن فضای ذخیره‌سازی شما بستگی دارد.</p>
 
       <label>
         توضیحات فیلم
