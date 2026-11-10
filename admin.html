@@ -1,0 +1,429 @@
+
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CineVerse Studio | مدیریت</title>
+
+<link rel="stylesheet" href="style.css">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script defer src="admin.js"></script>
+
+<style>
+:root {
+  --gold: #d4af37;
+  --gold-light: #f5dc83;
+  --bg: #080808;
+  --panel: rgba(25,25,25,.88);
+  --border: rgba(212,175,55,.25);
+  --text: #fff;
+  --muted: #999;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse at 80% 0%, #39280c 0%, transparent 35%),
+    radial-gradient(ellipse at 10% 90%, #211608 0%, transparent 35%),
+    var(--bg);
+  color: var(--text);
+  font-family: Tahoma, Arial, sans-serif;
+}
+
+header {
+  min-height: 75px;
+  padding: 15px 7%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  background: rgba(8,8,8,.85);
+  backdrop-filter: blur(15px);
+}
+
+.logo {
+  font-size: 27px;
+  font-weight: bold;
+  color: white;
+  text-decoration: none;
+  direction: ltr;
+}
+
+.logo span {
+  color: var(--gold);
+}
+
+.btn {
+  display: inline-block;
+  padding: 13px 23px;
+  background: linear-gradient(135deg,#f5dc83,#b58a20);
+  color: #111;
+  border: none;
+  border-radius: 10px;
+  font-weight: bold;
+  font-family: inherit;
+  cursor: pointer;
+  text-decoration: none;
+  transition: .25s;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 25px #d4af3744;
+}
+
+.btn.secondary {
+  background: #292929;
+  color: white;
+  border: 1px solid #444;
+}
+
+.admin {
+  width: min(1050px, 90%);
+  margin: 60px auto;
+}
+
+h1 {
+  font-size: 35px;
+  margin-bottom: 35px;
+}
+
+h1 em {
+  color: var(--gold);
+  font-style: normal;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 30px;
+  margin-bottom: 25px;
+  box-shadow: 0 15px 50px #0008;
+  backdrop-filter: blur(20px);
+}
+
+.panel h2 {
+  color: var(--gold-light);
+  margin-top: 0;
+  font-size: 23px;
+}
+
+.panel p {
+  color: var(--muted);
+  line-height: 2;
+}
+
+#loginPanel {
+  max-width: 480px;
+  margin: 40px auto;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-top: 25px;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  color: #ddd;
+  font-size: 14px;
+}
+
+input, select, textarea {
+  width: 100%;
+  padding: 15px;
+  color: white;
+  background: #101010;
+  border: 1px solid #383838;
+  border-radius: 10px;
+  outline: none;
+  font-family: inherit;
+  font-size: 14px;
+  transition: .25s;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px #d4af3718;
+}
+
+select option {
+  background: #111;
+}
+
+.two {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+label.inline {
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+}
+
+label.inline input {
+  width: 18px;
+  accent-color: var(--gold);
+}
+
+form .btn {
+  width: 100%;
+}
+
+#formMessage,
+#loginMessage {
+  color: var(--gold-light);
+  font-size: 14px;
+}
+
+#adminMovies {
+  display: grid;
+  gap: 12px;
+}
+
+#adminMovies > * {
+  background: #111;
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 15px;
+  color: white;
+}
+
+#adminMovies button {
+  background: #292929;
+  color: var(--gold-light);
+  border: 1px solid #555;
+  border-radius: 8px;
+  padding: 9px 15px;
+  cursor: pointer;
+  margin: 5px;
+}
+
+footer {
+  text-align: center;
+  padding: 30px;
+  color: #777;
+  border-top: 1px solid var(--border);
+}
+
+[hidden] {
+  display: none !important;
+}
+
+@media(max-width:600px) {
+  header {
+    padding: 15px 5%;
+  }
+
+  .admin {
+    width: 92%;
+    margin: 35px auto;
+  }
+
+  h1 {
+    font-size: 27px;
+  }
+
+  .panel {
+    padding: 20px;
+  }
+
+  .two {
+    grid-template-columns: 1fr;
+  }
+
+  .logo {
+    font-size: 21px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <a class="logo" href="index.html">
+    Cine<span>Verse</span>
+  </a>
+
+  <a class="btn" href="index.html">
+    بازگشت به سایت
+  </a>
+</header>
+
+<main class="admin">
+
+<h1>پنل <em>مدیریت</em></h1>
+
+<section id="loginPanel" class="panel">
+
+  <h2>ورود مدیر</h2>
+
+  <p>
+    به استودیوی اختصاصی CineVerse خوش آمدید.
+  </p>
+
+  <p>
+    برای ورود به پنل مدیریت، مشخصات خود را وارد کنید.
+  </p>
+
+  <form id="loginForm">
+
+    <label>
+      نام کاربری مدیر
+      <input
+        id="email"
+        type="text"
+        value="vahid"
+        placeholder="vahid"
+        autocomplete="username"
+        required
+      >
+    </label>
+
+    <label>
+      رمز عبور
+      <input
+        id="password"
+        type="password"
+        placeholder="رمز عبور"
+        autocomplete="current-password"
+        required
+      >
+    </label>
+
+    <button class="btn" type="submit">
+      ورود به پنل مدیریت
+    </button>
+
+  </form>
+
+  <p id="loginMessage"></p>
+
+</section>
+
+<section id="dashboard" hidden>
+
+  <div class="panel">
+
+    <h2 id="formTitle">افزودن فیلم جدید</h2>
+
+    <button id="logoutBtn" class="btn secondary" type="button">
+      خروج از حساب
+    </button>
+
+    <form id="movieForm">
+
+      <input id="movieId" type="hidden">
+
+      <label>
+        نام فیلم *
+        <input id="title" required placeholder="نام فیلم">
+      </label>
+
+      <div class="two">
+
+        <label>
+          سال انتشار
+          <input id="year" type="number" placeholder="2026">
+        </label>
+
+        <label>
+          امتیاز فیلم
+          <input id="rating" type="number"
+          min="0" max="10" step=".1" placeholder="8.5">
+        </label>
+
+      </div>
+
+      <div class="two">
+
+        <label>
+          دسته‌بندی
+          <select id="category">
+            <option>سایر</option>
+            <option>اکشن</option>
+            <option>درام</option>
+            <option>کمدی</option>
+            <option>ترسناک</option>
+            <option>علمی‌تخیلی</option>
+            <option>عاشقانه</option>
+            <option>مستند</option>
+          </select>
+        </label>
+
+        <label>
+          زبان فیلم
+          <input id="language" placeholder="فارسی، انگلیسی و...">
+        </label>
+
+      </div>
+
+      <label>
+        لینک پوستر فیلم
+        <input id="posterUrl" type="url" placeholder="https://...">
+      </label>
+
+      <label>
+        لینک مستقیم فیلم
+        <input id="videoUrl" type="url" placeholder="https://...">
+      </label>
+
+      <label>
+        توضیحات فیلم
+        <textarea id="overview" rows="4"
+        placeholder="خلاصه داستان فیلم..."></textarea>
+      </label>
+
+      <label class="inline">
+        <input id="published" type="checkbox" checked>
+        انتشار فیلم در سایت
+      </label>
+
+      <button class="btn" type="submit">
+        ذخیره فیلم
+      </button>
+
+      <button id="resetBtn" class="btn secondary" type="button">
+        پاک کردن فرم
+      </button>
+
+      <p id="formMessage"></p>
+
+    </form>
+
+  </div>
+
+  <div class="panel">
+
+    <h2>فیلم‌های ثبت‌شده</h2>
+
+    <div id="adminMovies"></div>
+
+  </div>
+
+</section>
+
+</main>
+
+<footer>
+  CineVerse Studio · Premium Movie Management
+</footer>
+
+</body>
+</html>
