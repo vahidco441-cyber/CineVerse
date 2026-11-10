@@ -1,205 +1,404 @@
-(() => {
-  "use strict";
 
-  const cfg = window.CINEVERSE_CONFIG || {};
-  const $ = id => document.getElementById(id);
+/* =====================================
+   CineVerse Admin Panel - admin.js
+   ===================================== */
+
+document.addEventListener("DOMContentLoaded", () => {
+  const config = window.CINEVERSE_CONFIG;
+
+  if (!config || !config.supabaseUrl || !config.supabaseAnonKey) {
+    alert("تنظیمات سایت پیدا نشد. فایل config.js را بررسی کنید.");
+    return;
+  }
+
+  const client = window.supabase.createClient(
+    config.supabaseUrl,
+    config.supabaseAnonKey
+  );
+
   const BUCKET = "cineverse-media";
-  let db = null;
-  let movieCache = [];
+  const MOVIES_TABLE = "cv_movies";
+  const ADMINS_TABLE = "cv_admins";
 
-  const message = (id, text) => { const el = $(id); if (el) el.textContent = text; };
-  const escapeHtml = value => String(value ?? "").replace(/[&<>"']/g, ch => ({
-    "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
-  }[ch]));
+  // عناصر صفحه
+  const $ = (id) => document.getElementById(id);
 
-  function showLogin(text = "") {
-    $("loginPanel").hidden = false;
-    $("dashboard").hidden = true;
-    message("loginMessage", text);
+  const loginPanel = $("loginPanel");
+  const loginForm = $("loginForm");
+  const loginMessage = $("loginMessage");
+  const dashboard = $("dashboard");
+  const logoutBtn = $("logoutBtn");
+
+  const movieForm = $("movieForm");
+  const movieId = $("movieId");
+  const formTitle = $("formTitle");
+  const formMessage = $("formMessage");
+  const resetBtn = $("resetBtn");
+  const adminMovies = $("adminMovies");
+
+  let currentUser = null;
+
+  function message(element, text, success = false) {
+    if (!element) return;
+
+    element.textContent = text;
+    element.style.color = success ? "#22c55e" : "#ef4444";
   }
 
-  function showDashboard() {
-    $("loginPanel").hidden = true;
-    $("dashboard").hidden = false;
-    loadMovies();
+  function showDashboard(show) {
+    if (loginPanel) loginPanel.hidden = show;
+    if (dashboard) dashboard.hidden = !show;
   }
 
-  function translateAuthError(error) {
-    const raw = error?.message || "خطا در ورود";
-    if (/invalid login credentials/i.test(raw)) return "ایمیل یا رمز عبور درست نیست.";
-    if (/email not confirmed/i.test(raw)) return "ایمیل حساب هنوز تأیید نشده است.";
-    if (/network|fetch/i.test(raw)) return "ارتباط اینترنت یا سرویس ورود برقرار نشد.";
-    return raw;
+  function escapeHTML(value) {
+    return String(value ?? "").replace(/[&<>"']/g, (char) => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#039;"
+    })[char]);
   }
 
-  async function verifySession() {
-    const { data, error } = await db.auth.getSession();
-    if (error) {
-      showLogin("بررسی نشست ورود ناموفق بود: " + error.message);
-      return;
-    }
-    if (!data.session) {
-      showLogin();
-      return;
-    }
-    const { data: admin, error: adminError } = await db
-      .from("cv_admins")
+  // بررسی دسترسی مدیر
+  async function verifyAdmin(user) {
+    const { data, error } = await client
+      .from(ADMINS_TABLE)
       .select("user_id")
-      .eq("user_id", data.session.user.id)
+      .eq("user_id", user.id)
       .maybeSingle();
-    if (adminError || !admin) {
-      await db.auth.signOut();
-      showLogin("این حساب مجوز مدیریت سایت را ندارد.");
-      return;
+
+    if (error) {
+      throw error;
     }
-    showDashboard();
+
+    if (!data) {
+      await client.auth.signOut();
+      throw new Error("این حساب دسترسی مدیریت ندارد.");
+    }
+
+    currentUser = user;
+    showDashboard(true);
+    await loadMovies();
   }
 
+  // ورود مدیر
+  loginForm?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const email = $("email").value.trim();
+    const password = $("password").value;
+
+    message(loginMessage, "در حال بررسی اطلاعات ورود...", true);
+
+    const { data, error } = await client.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (error) {
+      message(loginMessage, "ورود ناموفق بود: " + error.message);
+      return;
+    }
+
+    try {
+      await verifyAdmin(data.user);
+      message(loginMessage, "با موفقیت وارد شدید.", true);
+    } catch (err) {
+      showDashboard(false);
+      message(loginMessage, err.message);
+    }
+  });
+
+  // خروج مدیر
+  logoutBtn?.addEventListener("click", async () => {
+    const { error } = await client.auth.signOut();
+
+    if (error) {
+      alert("خطا در خروج: " + error.message);
+      return;
+    }
+
+    currentUser = null;
+    showDashboard(false);
+    loginForm?.reset();
+    message(loginMessage, "از پنل خارج شدید.", true);
+  });
+
+  // آپلود فایل
   async function uploadFile(file, folder) {
     if (!file) return null;
-    const extension = (file.name.split(".").pop() || "bin").toLowerCase().replace(/[^a-z0-9]/g, "");
-    const path = folder + "/" + crypto.randomUUID() + "." + extension;
-    const { error } = await db.storage.from(BUCKET).upload(path, file, {
-      cacheControl: "3600",
-      upsert: false,
-      contentType: file.type || "application/octet-stream"
-    });
+
+    const extension = file.name.split(".").pop().toLowerCase();
+    const allowedExtensions = folder === "posters"
+      ? ["jpg", "jpeg", "png", "webp"]
+      : ["mp4", "webm", "mov", "m4v"];
+
+    if (!allowedExtensions.includes(extension)) {
+      throw new Error("فرمت فایل انتخاب‌شده مجاز نیست.");
+    }
+
+    const fileName =
+      `${folder}/${Date.now()}-${crypto.randomUUID()}.${extension}`;
+
+    const { error } = await client.storage
+      .from(BUCKET)
+      .upload(fileName, file, {
+        cacheControl: "3600",
+        upsert: false
+      });
+
     if (error) throw error;
-    const { data } = db.storage.from(BUCKET).getPublicUrl(path);
+
+    const { data } = client.storage
+      .from(BUCKET)
+      .getPublicUrl(fileName);
+
     return data.publicUrl;
   }
 
-  function resetForm() {
-    $("movieForm").reset();
-    $("movieId").value = "";
-    $("published").checked = true;
-    $("formTitle").textContent = "افزودن فیلم جدید";
-    message("formMessage", "");
+  // ثبت یا ویرایش فیلم
+  movieForm?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    if (!currentUser) {
+      message(formMessage, "ابتدا وارد حساب مدیر شوید.");
+      return;
+    }
+
+    const submitButton = movieForm.querySelector(
+      '[type="submit"]'
+    );
+
+    if (submitButton) submitButton.disabled = true;
+
+    try {
+      message(formMessage, "در حال ذخیره اطلاعات...", true);
+
+      const posterFile = $("posterFile")?.files[0];
+      const videoFile = $("videoFile")?.files[0];
+
+      let posterUrl = $("posterUrl").value.trim();
+      let videoUrl = $("videoUrl").value.trim();
+
+      if (posterFile) {
+        posterUrl = await uploadFile(posterFile, "posters");
+      }
+
+      if (videoFile) {
+        videoUrl = await uploadFile(videoFile, "videos");
+      }
+
+      const movie = {
+        title: $("title").value.trim(),
+        year: Number($("year").value) || null,
+        rating: Number($("rating").value) || 0,
+        category: $("category").value.trim(),
+        language: $("language").value.trim(),
+        poster_url: posterUrl,
+        cloud_url: videoUrl,
+        overview: $("overview").value.trim(),
+        published: $("published").checked
+      };
+
+      if (!movie.title) {
+        throw new Error("عنوان فیلم را وارد کنید.");
+      }
+
+      if (!movie.cloud_url) {
+        throw new Error("لینک یا فایل فیلم را وارد کنید.");
+      }
+
+      let result;
+
+      if (movieId.value) {
+        result = await client
+          .from(MOVIES_TABLE)
+          .update(movie)
+          .eq("id", movieId.value);
+      } else {
+        result = await client
+          .from(MOVIES_TABLE)
+          .insert(movie);
+      }
+
+      if (result.error) throw result.error;
+
+      message(
+        formMessage,
+        movieId.value
+          ? "فیلم با موفقیت ویرایش شد."
+          : "فیلم با موفقیت اضافه شد.",
+        true
+      );
+
+      resetMovieForm();
+      await loadMovies();
+
+    } catch (error) {
+      message(formMessage, "خطا: " + error.message);
+    } finally {
+      if (submitButton) submitButton.disabled = false;
+    }
+  });
+
+  // پاک کردن فرم
+  function resetMovieForm() {
+    movieForm?.reset();
+
+    if (movieId) movieId.value = "";
+
+    if (formTitle) {
+      formTitle.textContent = "افزودن فیلم جدید";
+    }
+
+    message(formMessage, "");
   }
 
+  resetBtn?.addEventListener("click", resetMovieForm);
+
+  // دریافت فهرست فیلم‌ها
   async function loadMovies() {
-    const container = $("adminMovies");
-    container.textContent = "در حال دریافت فهرست فیلم‌ها...";
-    const { data, error } = await db.from("cv_movies").select("*").order("created_at", { ascending: false });
+    if (!adminMovies) return;
+
+    adminMovies.innerHTML = "<p>در حال دریافت فیلم‌ها...</p>";
+
+    const { data, error } = await client
+      .from(MOVIES_TABLE)
+      .select("*")
+      .order("created_at", { ascending: false });
+
     if (error) {
-      container.textContent = "خطا در دریافت فیلم‌ها: " + error.message;
+      adminMovies.textContent = "خطا در دریافت فیلم‌ها: " + error.message;
       return;
     }
-    movieCache = data || [];
-    if (!movieCache.length) {
-      container.textContent = "هنوز فیلمی ثبت نشده است.";
+
+    if (!data || data.length === 0) {
+      adminMovies.innerHTML = "<p>هنوز فیلمی ثبت نشده است.</p>";
       return;
     }
-    container.innerHTML = movieCache.map(movie => `
-      <div class="item">
-        <span>${escapeHtml(movie.title)} <small>${movie.published ? "منتشرشده" : "پیش‌نویس"}</small></span>
-        <button type="button" data-edit="${escapeHtml(movie.id)}">ویرایش</button>
-        <button type="button" data-delete="${escapeHtml(movie.id)}">حذف</button>
-      </div>`).join("");
 
-    container.querySelectorAll("[data-edit]").forEach(button => {
-      button.addEventListener("click", () => {
-        const movie = movieCache.find(item => item.id === button.dataset.edit);
-        if (!movie) return;
-        $("movieId").value = movie.id;
-        $("title").value = movie.title || "";
-        $("year").value = movie.year || "";
-        $("rating").value = movie.rating ?? "";
-        $("category").value = movie.category || "سایر";
-        $("language").value = movie.language || "";
-        $("posterUrl").value = movie.poster_url || "";
-        $("videoUrl").value = movie.cloud_url || "";
-        $("overview").value = movie.overview || "";
-        $("published").checked = !!movie.published;
-        $("posterFile").value = "";
-        $("videoFile").value = "";
-        $("formTitle").textContent = "ویرایش فیلم";
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      });
-    });
+    adminMovies.innerHTML = data.map((movie) => `
+      <article class="admin-movie-card">
+        <img
+          src="${escapeHTML(movie.poster_url || "")}"
+          alt="${escapeHTML(movie.title)}"
+          class="admin-movie-poster"
+          onerror="this.style.display='none'"
+        >
 
-    container.querySelectorAll("[data-delete]").forEach(button => {
-      button.addEventListener("click", async () => {
-        if (!window.confirm("این فیلم حذف شود؟")) return;
-        const { error: deleteError } = await db.from("cv_movies").delete().eq("id", button.dataset.delete);
-        if (deleteError) window.alert("حذف انجام نشد: " + deleteError.message);
-        else loadMovies();
-      });
+        <div class="admin-movie-info">
+          <h3>${escapeHTML(movie.title)}</h3>
+
+          <p>سال: ${escapeHTML(movie.year || "-")}</p>
+          <p>امتیاز: ${escapeHTML(movie.rating ?? "-")}</p>
+          <p>دسته‌بندی: ${escapeHTML(movie.category || "-")}</p>
+          <p>وضعیت: ${movie.published ? "منتشر شده" : "پیش‌نویس"}</p>
+
+          <button
+            type="button"
+            data-edit="${escapeHTML(movie.id)}"
+          >ویرایش</button>
+
+          <button
+            type="button"
+            data-delete="${escapeHTML(movie.id)}"
+          >حذف</button>
+        </div>
+      </article>
+    `).join("");
+  }
+
+  // ویرایش و حذف فیلم
+  adminMovies?.addEventListener("click", async (event) => {
+    const editButton = event.target.closest("[data-edit]");
+    const deleteButton = event.target.closest("[data-delete]");
+
+    if (editButton) {
+      await editMovie(editButton.dataset.edit);
+    }
+
+    if (deleteButton) {
+      await deleteMovie(deleteButton.dataset.delete);
+    }
+  });
+
+  // بارگذاری اطلاعات فیلم در فرم
+  async function editMovie(id) {
+    const { data, error } = await client
+      .from(MOVIES_TABLE)
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (error) {
+      alert("خطا در دریافت اطلاعات فیلم: " + error.message);
+      return;
+    }
+
+    movieId.value = data.id;
+    $("title").value = data.title || "";
+    $("year").value = data.year ?? "";
+    $("rating").value = data.rating ?? "";
+    $("category").value = data.category || "";
+    $("language").value = data.language || "";
+    $("posterUrl").value = data.poster_url || "";
+    $("videoUrl").value = data.cloud_url || "";
+    $("overview").value = data.overview || "";
+    $("published").checked = Boolean(data.published);
+
+    if (formTitle) {
+      formTitle.textContent = "ویرایش فیلم";
+    }
+
+    message(formMessage, "اطلاعات فیلم برای ویرایش آماده است.", true);
+
+    movieForm.scrollIntoView({
+      behavior: "smooth",
+      block: "start"
     });
   }
 
-  async function init() {
-    if (!cfg.supabaseUrl?.startsWith("https://") || !cfg.supabaseAnonKey || !window.supabase) {
-      showLogin("تنظیمات اتصال سایت کامل نیست.");
+  // حذف فیلم
+  async function deleteMovie(id) {
+    if (!confirm("آیا از حذف این فیلم مطمئن هستید؟")) {
       return;
     }
-    db = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
-    $("loginForm").addEventListener("submit", async event => {
-      event.preventDefault();
-      const button = $("loginForm").querySelector('button[type="submit"]');
-      button.disabled = true;
-      message("loginMessage", "در حال بررسی اطلاعات ورود...");
-      const { error } = await db.auth.signInWithPassword({
-        email: $("email").value.trim(),
-        password: $("password").value
-      });
-      button.disabled = false;
-      if (error) {
-        message("loginMessage", translateAuthError(error));
-        return;
-      }
-      await verifySession();
-    });
 
-    $("logoutBtn").addEventListener("click", async () => {
-      await db.auth.signOut();
-      showLogin("از حساب خارج شدی.");
-    });
-    $("resetBtn").addEventListener("click", resetForm);
+    const { error } = await client
+      .from(MOVIES_TABLE)
+      .delete()
+      .eq("id", id);
 
-    $("movieForm").addEventListener("submit", async event => {
-      event.preventDefault();
-      const submit = $("movieForm").querySelector('button[type="submit"]');
-      submit.disabled = true;
-      message("formMessage", "در حال ذخیره فیلم و آپلود فایل‌ها...");
+    if (error) {
+      alert("خطا در حذف فیلم: " + error.message);
+      return;
+    }
+
+    alert("فیلم با موفقیت حذف شد.");
+    await loadMovies();
+  }
+
+  // بررسی وضعیت ورود هنگام باز شدن صفحه
+  async function initialize() {
+    showDashboard(false);
+
+    const { data, error } = await client.auth.getSession();
+
+    if (error) {
+      message(loginMessage, error.message);
+      return;
+    }
+
+    if (data.session?.user) {
       try {
-        const posterFileUrl = await uploadFile($("posterFile").files[0], "posters");
-        const videoFileUrl = await uploadFile($("videoFile").files[0], "videos");
-        const oldMovie = movieCache.find(item => item.id === $("movieId").value);
-        const posterUrl = posterFileUrl || $("posterUrl").value.trim() || oldMovie?.poster_url || null;
-        const videoUrl = videoFileUrl || $("videoUrl").value.trim() || oldMovie?.cloud_url || null;
-        const payload = {
-          title: $("title").value.trim(),
-          year: $("year").value ? Number($("year").value) : null,
-          rating: $("rating").value ? Number($("rating").value) : null,
-          category: $("category").value,
-          language: $("language").value.trim() || null,
-          poster_url: posterUrl,
-          cloud_url: videoUrl,
-          overview: $("overview").value.trim() || null,
-          published: $("published").checked
-        };
-        if (!payload.title) throw new Error("نام فیلم را وارد کن.");
-        if (!payload.cloud_url) throw new Error("فایل فیلم را انتخاب کن یا لینک مستقیم وارد کن.");
-
-        const id = $("movieId").value;
-        const result = id
-          ? await db.from("cv_movies").update(payload).eq("id", id)
-          : await db.from("cv_movies").insert(payload);
-        if (result.error) throw result.error;
-        message("formMessage", "فیلم با موفقیت ذخیره شد.");
-        resetForm();
-        await loadMovies();
-      } catch (error) {
-        console.error("CineVerse save error:", error);
-        message("formMessage", "ذخیره انجام نشد: " + (error.message || "خطای نامشخص"));
-      } finally {
-        submit.disabled = false;
+        await verifyAdmin(data.session.user);
+      } catch (err) {
+        showDashboard(false);
+        message(loginMessage, err.message);
       }
-    });
-
-    await verifySession();
+    }
   }
 
-  init();
-})();
+  initialize();
+});
