@@ -271,12 +271,40 @@ footer {
 
   <form id="loginForm">
 
+    <label>
+      ایمیل حساب مدیر
+      <input
+        id="email"
+        type="email"
+        placeholder="ایمیل حساب مدیر"
+        autocomplete="username"
+        required
+      >
+    </label>
 
+    <label>
+      رمز عبور
+      <input
+        id="password"
+        type="password"
+        placeholder="رمز عبور"
+        autocomplete="current-password"
+        required
+      >
+    </label>
 
     <button id="adminLoginBtn"
     class="glass-admin-btn" type="submit">
       پنل ادمین
       <span>←</span>
+    </button>
+
+    <button
+      id="forgotPasswordBtn"
+      class="btn secondary"
+      type="button"
+    >
+      فراموشی رمز عبور؟ ارسال لینک بازیابی
     </button>
 
   </form>
