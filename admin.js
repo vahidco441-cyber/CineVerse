@@ -25,6 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const loginPanel = $("loginPanel");
   const loginForm = $("loginForm");
+  const forgotPasswordBtn = $("forgotPasswordBtn");
   const loginMessage = $("loginMessage");
   const dashboard = $("dashboard");
   const logoutBtn = $("logoutBtn");
@@ -107,6 +108,46 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (err) {
       showDashboard(false);
       message(loginMessage, err.message);
+    }
+  });
+
+  // ارسال لینک بازیابی رمز با مسیر بازگشت مشخص
+  forgotPasswordBtn?.addEventListener("click", async () => {
+    const emailInput = $("email");
+    const email = emailInput?.value.trim();
+
+    if (!email) {
+      message(loginMessage, "ابتدا ایمیل حساب مدیر را وارد کنید.");
+      emailInput?.focus();
+      return;
+    }
+
+    const originalText = forgotPasswordBtn.textContent;
+    forgotPasswordBtn.disabled = true;
+    forgotPasswordBtn.textContent = "در حال ارسال لینک...";
+
+    try {
+      const redirectTo = new URL(
+        "reset-password.html",
+        window.location.href
+      ).toString();
+
+      const { error } = await client.auth.resetPasswordForEmail(email, {
+        redirectTo
+      });
+
+      if (error) throw error;
+
+      message(
+        loginMessage,
+        "لینک بازیابی ارسال شد. ایمیل خود را بررسی کنید و فقط جدیدترین لینک را باز کنید.",
+        true
+      );
+    } catch (error) {
+      message(loginMessage, "ارسال لینک بازیابی ناموفق بود: " + error.message);
+    } finally {
+      forgotPasswordBtn.disabled = false;
+      forgotPasswordBtn.textContent = originalText;
     }
   });
 
