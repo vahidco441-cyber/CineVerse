@@ -1,0 +1,272 @@
+
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>CineVerse</title>
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+    #passwordRecovery {
+      display: none;
+      max-width: 440px;
+      margin: 60px auto;
+      padding: 30px;
+      background: #15151f;
+      border: 1px solid #39394d;
+      border-radius: 18px;
+      color: white;
+      text-align: center;
+      box-shadow: 0 15px 45px #0008;
+    }
+
+    #passwordRecovery input {
+      display: block;
+      width: 100%;
+      box-sizing: border-box;
+      padding: 14px;
+      margin: 14px 0;
+      border-radius: 10px;
+      border: 1px solid #444;
+      background: #222231;
+      color: white;
+      font-size: 15px;
+      direction: ltr;
+    }
+
+    #passwordRecovery button {
+      width: 100%;
+      padding: 14px;
+      margin-top: 10px;
+      border: none;
+      border-radius: 10px;
+      background: #8b5cf6;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    #recoveryMessage {
+      margin-top: 15px;
+      line-height: 1.8;
+      font-size: 14px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header class="topbar">
+    <div class="brand">Cine<span>Verse</span></div>
+
+    <nav>
+      <a class="active" href="#hero">خانه</a>
+      <a href="#popular">محبوب‌ترین‌ها</a>
+      <a href="#newest">جدیدترین‌ها</a>
+      <a href="admin.html">پنل مدیریت</a>
+    </nav>
+
+    <div class="header-actions">
+      <div class="search-box" aria-label="جستجو">
+        <span>⌕</span>
+        <input id="searchInput" placeholder="جستجوی فیلم..." autocomplete="off">
+      </div>
+      <button id="reloadBtn" class="icon-btn" title="به‌روزرسانی">↻</button>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- فرم بازیابی رمز -->
+    <section id="passwordRecovery">
+      <h2>تغییر رمز عبور مدیر</h2>
+      <p>برای حساب CineVerse خود یک رمز جدید انتخاب کنید.</p>
+
+      <form id="recoveryForm">
+
+        <input
+          type="password"
+          id="newPassword"
+          placeholder="رمز عبور جدید"
+          minlength="8"
+          autocomplete="new-password"
+          required
+        >
+
+        <input
+          type="password"
+          id="confirmPassword"
+          placeholder="تکرار رمز عبور جدید"
+          minlength="8"
+          autocomplete="new-password"
+          required
+        >
+
+        <button type="submit" id="recoverySubmit">
+          ذخیره رمز جدید
+        </button>
+
+        <p id="recoveryMessage"></p>
+      </form>
+    </section>
+
+    <section id="hero" class="hero">
+      <div class="hero-shade"></div>
+
+      <div class="hero-content">
+        <div class="hero-kicker"><span></span> پیشنهاد CineVerse</div>
+        <h1 id="heroTitle">در حال بارگذاری فیلم‌ها...</h1>
+        <div id="heroMeta" class="hero-meta">اتصال به Jellyfin</div>
+        <p id="heroOverview" class="hero-overview"></p>
+
+        <div class="hero-buttons">
+          <button id="heroPlay" class="play-btn"><b>▶</b> پخش فیلم</button>
+          <button class="watch-btn"><b>＋</b> افزودن به لیست</button>
+        </div>
+      </div>
+
+      <div class="hero-bottom-fade"></div>
+    </section>
+
+    <section id="status" class="status">
+      در حال دریافت فیلم‌ها از Jellyfin...
+    </section>
+
+    <section id="popular" class="section">
+      <div class="section-head">
+        <div>
+          <h2>فیلم‌های محبوب</h2>
+          <p>Popular Movies</p>
+        </div>
+        <a href="#popular">مشاهده همه <span>←</span></a>
+      </div>
+
+      <div id="popularGrid" class="movie-grid"></div>
+    </section>
+
+    <section id="newest" class="section newest-section">
+      <div class="section-head">
+        <div>
+          <h2>جدیدترین فیلم‌ها</h2>
+          <p>Latest Movies</p>
+        </div>
+        <a href="#newest">مشاهده همه <span>←</span></a>
+      </div>
+
+      <div id="newestGrid" class="movie-grid"></div>
+    </section>
+
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="script.js"></script>
+
+  <!-- مدیریت بازیابی رمز -->
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+
+      const recoverySection = document.getElementById("passwordRecovery");
+      const recoveryForm = document.getElementById("recoveryForm");
+      const recoveryMessage = document.getElementById("recoveryMessage");
+      const submitButton = document.getElementById("recoverySubmit");
+
+      const config = window.CINEVERSE_CONFIG;
+
+      if (!config || !config.supabaseUrl || !config.supabaseAnonKey) {
+        console.error("تنظیمات ورود پیدا نشد.");
+        return;
+      }
+
+      const client = window.supabase.createClient(
+        config.supabaseUrl,
+        config.supabaseAnonKey
+      );
+
+      function showRecovery(message, success = false) {
+        recoverySection.style.display = "block";
+        recoveryMessage.textContent = message;
+        recoveryMessage.style.color = success ? "#22c55e" : "#ef4444";
+
+        recoverySection.scrollIntoView({
+          behavior: "smooth",
+          block: "center"
+        });
+      }
+
+      // بررسی خطاهای لینک بازیابی
+      const hash = new URLSearchParams(
+        window.location.hash.substring(1)
+      );
+
+      const errorCode = hash.get("error_code");
+      const errorDescription = hash.get("error_description");
+
+      if (errorCode) {
+        showRecovery(
+          errorCode === "otp_expired"
+            ? "لینک بازیابی منقضی شده است. لطفاً ایمیل بازیابی جدید درخواست کنید."
+            : "خطا در لینک بازیابی: " + (errorDescription || errorCode)
+        );
+      }
+
+      // تشخیص ورود از طریق لینک بازیابی
+      client.auth.onAuthStateChange((event, session) => {
+
+        if (event === "PASSWORD_RECOVERY" && session) {
+          showRecovery("لینک معتبر است. رمز جدید خود را وارد کنید.", true);
+        }
+
+      });
+
+      // بررسی فرم تعیین رمز جدید
+      recoveryForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        const password = document.getElementById("newPassword").value;
+        const confirmPassword = document.getElementById("confirmPassword").value;
+
+        if (password.length < 8) {
+          showRecovery("رمز عبور باید حداقل ۸ کاراکتر باشد.");
+          return;
+        }
+
+        if (password !== confirmPassword) {
+          showRecovery("رمزهای وارد شده یکسان نیستند.");
+          return;
+        }
+
+        submitButton.disabled = true;
+        submitButton.textContent = "در حال ذخیره...";
+
+        const { error } = await client.auth.updateUser({
+          password: password
+        });
+
+        submitButton.disabled = false;
+        submitButton.textContent = "ذخیره رمز جدید";
+
+        if (error) {
+          showRecovery("خطا در تغییر رمز: " + error.message);
+          return;
+        }
+
+        showRecovery(
+          "رمز عبور با موفقیت تغییر کرد. در حال انتقال به پنل مدیریت...",
+          true
+        );
+
+        recoveryForm.reset();
+
+        setTimeout(() => {
+          window.location.href = "admin.html";
+        }, 2000);
+
+      });
+
+    });
+  </script>
+
+</body>
+</html>
