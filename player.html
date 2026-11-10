@@ -1,1 +1,48 @@
-<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>پخش فیلم | CineVerse</title><link rel="stylesheet" href="style.css"></head><body><header><a class="logo" href="index.html">Cine<span>Verse</span></a><a class="btn" href="index.html">بازگشت</a></header><main class="admin"><h1 id="playerTitle">پخش فیلم</h1><video id="player" controls playsinline></video><p>برای پخش، لینک مستقیم و عمومی ویدئو لازم است.</p></main><script>const q=new URLSearchParams(location.search),s=q.get('src');document.getElementById('playerTitle').textContent=q.get('title')||'پخش فیلم';if(s){try{let u=new URL(s);if(['https:','http:'].includes(u.protocol))document.getElementById('player').src=u.href}catch(e){}}</script></body></html>
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>پخش فیلم | CineVerse</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .video-wrap{width:min(1100px,92%);margin:55px auto}
+    .video-wrap video{display:block;width:100%;max-height:75vh;background:#000;border:1px solid #333;border-radius:14px}
+    .video-message{color:#c8b66b;line-height:2}
+  </style>
+</head>
+<body>
+  <header>
+    <a class="logo" href="index.html">Cine<span>Verse</span></a>
+    <a class="btn" href="index.html">بازگشت به سایت</a>
+  </header>
+  <main class="video-wrap">
+    <h1 id="playerTitle">پخش فیلم</h1>
+    <video id="player" controls playsinline preload="metadata"></video>
+    <p id="playerMessage" class="video-message">در حال آماده‌سازی پخش...</p>
+  </main>
+  <script>
+    const params = new URLSearchParams(location.search);
+    const source = params.get("src");
+    const title = params.get("title") || "پخش فیلم";
+    document.getElementById("playerTitle").textContent = title;
+    const video = document.getElementById("player");
+    const message = document.getElementById("playerMessage");
+    if (!source) {
+      message.textContent = "لینک فیلم برای پخش ثبت نشده است.";
+    } else {
+      try {
+        const url = new URL(source);
+        if (!["https:", "http:"].includes(url.protocol)) throw new Error("invalid protocol");
+        video.src = url.href;
+        message.textContent = "اگر فیلم پخش نشد، فرمت فایل یا دسترسی لینک مستقیم را بررسی کن.";
+        video.addEventListener("error", () => {
+          message.textContent = "پخش این فایل در مرورگر ممکن نیست یا لینک آن در دسترس نیست.";
+        });
+      } catch (_) {
+        message.textContent = "لینک فیلم معتبر نیست.";
+      }
+    }
+  </script>
+</body>
+</html>
