@@ -15,38 +15,33 @@
 <style>
 :root {
   --gold: #d4af37;
-  --gold-light: #f5dc83;
+  --light: #f5dc83;
   --bg: #080808;
-  --panel: rgba(25,25,25,.88);
-  --border: rgba(212,175,55,.25);
-  --text: #fff;
-  --muted: #999;
+  --panel: rgba(255,255,255,.045);
+  --border: rgba(212,175,55,.3);
 }
 
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 body {
   margin: 0;
   min-height: 100vh;
-  background:
-    radial-gradient(ellipse at 80% 0%, #39280c 0%, transparent 35%),
-    radial-gradient(ellipse at 10% 90%, #211608 0%, transparent 35%),
-    var(--bg);
-  color: var(--text);
+  color: white;
   font-family: Tahoma, Arial, sans-serif;
+  background:
+    radial-gradient(ellipse at 80% 0%, #39280c, transparent 35%),
+    radial-gradient(ellipse at 10% 90%, #211608, transparent 35%),
+    #080808;
 }
 
 header {
-  min-height: 75px;
-  padding: 15px 7%;
+  padding: 18px 7%;
   display: flex;
-  align-items: center;
   justify-content: space-between;
+  align-items: center;
   border-bottom: 1px solid var(--border);
-  background: rgba(8,8,8,.85);
-  backdrop-filter: blur(15px);
+  background: rgba(255,255,255,.025);
+  backdrop-filter: blur(20px);
 }
 
 .logo {
@@ -57,38 +52,64 @@ header {
   direction: ltr;
 }
 
-.logo span {
-  color: var(--gold);
-}
+.logo span { color: var(--gold); }
 
 .btn {
-  display: inline-block;
-  padding: 13px 23px;
-  background: linear-gradient(135deg,#f5dc83,#b58a20);
-  color: #111;
-  border: none;
+  padding: 13px 22px;
+  border: 0;
   border-radius: 10px;
-  font-weight: bold;
   font-family: inherit;
+  font-weight: bold;
   cursor: pointer;
   text-decoration: none;
-  transition: .25s;
-}
-
-.btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 5px 25px #d4af3744;
+  background: linear-gradient(135deg,#f5dc83,#b58a20);
+  color: #111;
 }
 
 .btn.secondary {
-  background: #292929;
+  background: #222;
   color: white;
   border: 1px solid #444;
 }
 
+/* دکمه کاملاً شیشه‌ای */
+.glass-admin-btn {
+  width: 100%;
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--light);
+  background: rgba(255,255,255,.035);
+  border: 1px solid rgba(212,175,55,.65);
+  border-radius: 15px;
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  box-shadow:
+    inset 0 1px 2px rgba(255,255,255,.13),
+    0 8px 30px rgba(0,0,0,.3);
+  font-family: Tahoma;
+  font-size: 17px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: .35s;
+}
+
+.glass-admin-btn:hover {
+  background: rgba(212,175,55,.09);
+  border-color: var(--light);
+  box-shadow: 0 0 28px rgba(212,175,55,.25);
+  transform: translateY(-3px);
+}
+
+.glass-admin-btn:active {
+  transform: scale(.98);
+}
+
 .admin {
-  width: min(1050px, 90%);
-  margin: 60px auto;
+  width: min(1050px,92%);
+  margin: 55px auto;
 }
 
 h1 {
@@ -112,13 +133,13 @@ h1 em {
 }
 
 .panel h2 {
-  color: var(--gold-light);
+  color: var(--light);
   margin-top: 0;
   font-size: 23px;
 }
 
 .panel p {
-  color: var(--muted);
+  color: #aaa;
   line-height: 2;
 }
 
@@ -146,13 +167,12 @@ input, select, textarea {
   width: 100%;
   padding: 15px;
   color: white;
-  background: #101010;
+  background: rgba(0,0,0,.55);
   border: 1px solid #383838;
   border-radius: 10px;
   outline: none;
   font-family: inherit;
   font-size: 14px;
-  transition: .25s;
 }
 
 input:focus, select:focus, textarea:focus {
@@ -160,9 +180,7 @@ input:focus, select:focus, textarea:focus {
   box-shadow: 0 0 0 3px #d4af3718;
 }
 
-select option {
-  background: #111;
-}
+select option { background: #111; }
 
 .two {
   display: grid;
@@ -181,13 +199,10 @@ label.inline input {
   accent-color: var(--gold);
 }
 
-form .btn {
-  width: 100%;
-}
+form .btn { width: 100%; }
 
-#formMessage,
-#loginMessage {
-  color: var(--gold-light);
+#formMessage, #loginMessage {
+  color: var(--light);
   font-size: 14px;
 }
 
@@ -206,7 +221,7 @@ form .btn {
 
 #adminMovies button {
   background: #292929;
-  color: var(--gold-light);
+  color: var(--light);
   border: 1px solid #555;
   border-radius: 8px;
   padding: 9px 15px;
@@ -221,35 +236,15 @@ footer {
   border-top: 1px solid var(--border);
 }
 
-[hidden] {
-  display: none !important;
-}
+[hidden] { display: none !important; }
 
 @media(max-width:600px) {
-  header {
-    padding: 15px 5%;
-  }
-
-  .admin {
-    width: 92%;
-    margin: 35px auto;
-  }
-
-  h1 {
-    font-size: 27px;
-  }
-
-  .panel {
-    padding: 20px;
-  }
-
-  .two {
-    grid-template-columns: 1fr;
-  }
-
-  .logo {
-    font-size: 21px;
-  }
+  header { padding: 15px 5%; }
+  .admin { margin: 35px auto; }
+  h1 { font-size: 27px; }
+  .panel { padding: 20px; }
+  .two { grid-template-columns: 1fr; }
+  .logo { font-size: 21px; }
 }
 </style>
 </head>
@@ -260,10 +255,7 @@ footer {
   <a class="logo" href="index.html">
     Cine<span>Verse</span>
   </a>
-
-  <a class="btn" href="index.html">
-    بازگشت به سایت
-  </a>
+  <a class="btn" href="index.html">بازگشت به سایت</a>
 </header>
 
 <main class="admin">
@@ -274,40 +266,29 @@ footer {
 
   <h2>ورود مدیر</h2>
 
-  <p>
-    به استودیوی اختصاصی CineVerse خوش آمدید.
-  </p>
-
-  <p>
-    برای ورود به پنل مدیریت، مشخصات خود را وارد کنید.
-  </p>
+  <p>به استودیوی اختصاصی CineVerse خوش آمدید.</p>
+  <p>برای ورود، مشخصات حساب مدیر را وارد کنید.</p>
 
   <form id="loginForm">
 
     <label>
       ایمیل حساب مدیر
-      <input
-        id="email"
-        type="email"
-        placeholder="ایمیل ثبت‌شده مدیر"
-        autocomplete="username"
-        required
-      >
+      <input id="email" type="email"
+      placeholder="ایمیل حساب مدیر"
+      autocomplete="username" required>
     </label>
 
     <label>
       رمز عبور
-      <input
-        id="password"
-        type="password"
-        placeholder="رمز عبور"
-        autocomplete="current-password"
-        required
-      >
+      <input id="password" type="password"
+      placeholder="رمز عبور"
+      autocomplete="current-password" required>
     </label>
 
-    <button class="btn" type="submit">
-      ورود به پنل مدیریت
+    <button id="adminLoginBtn"
+    class="glass-admin-btn" type="submit">
+      پنل ادمین
+      <span>←</span>
     </button>
 
   </form>
@@ -322,9 +303,8 @@ footer {
 
     <h2 id="formTitle">افزودن فیلم جدید</h2>
 
-    <button id="logoutBtn" class="btn secondary" type="button">
-      خروج از حساب
-    </button>
+    <button id="logoutBtn" class="btn secondary"
+    type="button">خروج از حساب</button>
 
     <form id="movieForm">
 
@@ -336,7 +316,6 @@ footer {
       </label>
 
       <div class="two">
-
         <label>
           سال انتشار
           <input id="year" type="number" placeholder="2026">
@@ -347,11 +326,9 @@ footer {
           <input id="rating" type="number"
           min="0" max="10" step=".1" placeholder="8.5">
         </label>
-
       </div>
 
       <div class="two">
-
         <label>
           دسته‌بندی
           <select id="category">
@@ -370,30 +347,31 @@ footer {
           زبان فیلم
           <input id="language" placeholder="فارسی، انگلیسی و...">
         </label>
-
       </div>
 
       <label>
-        فایل پوستر (اختیاری)
-        <input id="posterFile" type="file" accept="image/jpeg,image/png,image/webp">
+        فایل پوستر
+        <input id="posterFile" type="file"
+        accept="image/jpeg,image/png,image/webp">
       </label>
 
       <label>
-        یا لینک پوستر
+        لینک پوستر
         <input id="posterUrl" type="url" placeholder="https://...">
       </label>
 
       <label>
         فایل فیلم برای آپلود
-        <input id="videoFile" type="file" accept="video/*,.mkv,.mp4,.webm,.mov">
+        <input id="videoFile" type="file"
+        accept="video/*,.mkv,.mp4,.webm,.mov">
       </label>
 
       <label>
-        یا لینک مستقیم فیلم
+        لینک مستقیم فیلم
         <input id="videoUrl" type="url" placeholder="https://...">
       </label>
 
-      <p>فایل‌ها در فضای ذخیره‌سازی سایت قرار می‌گیرند. سقف حجم آپلود به پلن فضای ذخیره‌سازی شما بستگی دارد.</p>
+      <p>حجم مجاز آپلود به فضای ذخیره‌سازی سایت بستگی دارد.</p>
 
       <label>
         توضیحات فیلم
@@ -406,26 +384,19 @@ footer {
         انتشار فیلم در سایت
       </label>
 
-      <button class="btn" type="submit">
-        ذخیره فیلم
-      </button>
+      <button class="btn" type="submit">ذخیره فیلم</button>
 
-      <button id="resetBtn" class="btn secondary" type="button">
-        پاک کردن فرم
-      </button>
+      <button id="resetBtn" class="btn secondary"
+      type="button">پاک کردن فرم</button>
 
       <p id="formMessage"></p>
 
     </form>
-
   </div>
 
   <div class="panel">
-
     <h2>فیلم‌های ثبت‌شده</h2>
-
     <div id="adminMovies"></div>
-
   </div>
 
 </section>
